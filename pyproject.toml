@@ -1,0 +1,14 @@
+[project]
+name = "outerspy"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14, <3.15"
+dependencies = [
+    "httpx>=0.28.1",
+]
+
+[dependency-groups]
+dev = [
+    "marimo>=0.24.2",
+]
