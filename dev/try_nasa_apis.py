@@ -6,13 +6,22 @@ app = marimo.App(width="full")
 
 @app.cell
 def _():
-    import json
     import csv
+    import json
+    from datetime import UTC, datetime, timedelta
     from io import StringIO
+
     import httpx
     import pandas as pd
 
-    return StringIO, httpx, pd
+    return UTC, datetime, httpx, timedelta
+
+
+@app.cell
+def _(UTC, datetime, timedelta):
+    now = datetime.now(tz=UTC)
+    week = now + timedelta(days=7)
+    return now, week
 
 
 @app.cell
@@ -26,14 +35,14 @@ def _():
 
 
 @app.cell
-def _():
+def _(now, week):
     HORIZON_API = "https://ssd.jpl.nasa.gov/api/horizons.api"
     params_horizon: dict[str, str] = {
-        "format": "json",
+        "format": "text",
         "COMMAND": "499",
         "EPHEM_TYPE": "ELEMENTS",
-        "START_TIME": "2026-09-19",
-        "STOP_TIME": "2026-09-30",
+        "START_TIME": now.date(),
+        "STOP_TIME": week.date(),
         "STEP_SIZE": "1d",
         "CENTER": "@10",
         "CSV_FORMAT": "YES",
@@ -45,61 +54,54 @@ def _():
 def _(HORIZON_API, httpx, params_horizon: dict[str, str]):
     response = httpx.get(url=HORIZON_API, params=params_horizon)
     response.raise_for_status()
-
-    data = response.json()
-    return (data,)
-
-
-@app.cell
-def _(data):
-    result = data.get("result")
-    print(result)
-    return (result,)
-
-
-@app.cell
-def _():
-    columns = ['JDTDB','Calendar Date (TDB)','EC','QR','IN','OM','W','Tp','N','MA','TA','A','AD','PR']
-    return (columns,)
-
-
-@app.cell
-def _(result):
-    if "$$SOE" in result and "$$EOE" in result:
-        table = result.split("$$SOE\n")[1].split("\n$$EOE")[0]
-    else:
-        print("No table")
-    return (table,)
-
-
-@app.cell
-def _(StringIO, columns, pd, table):
-    df = pd.read_csv(StringIO(table), header=None, names=columns, index_col=False)
-    df
+    horizon_res = response.text
+    print(horizon_res)
     return
 
 
 @app.cell
-def _():
+def _(now, week):
     from astroquery.jplhorizons import Horizons
 
     obj = Horizons(
-        id="499",
+        id="2026 RR34",
         location="@10",
-        epochs={"start": "2026-09-19", "stop": "2026-09-30", "step": "1d"},
+        epochs={
+            "start": str(now.date()),
+            "stop": str(week.date()),
+            "step": "1d",
+        },
     )
+    obj
     return (obj,)
 
 
 @app.cell
 def _(obj):
     elem = obj.elements()
-    return (elem,)
+    df = elem.to_df("polars")
+    df
+    return
 
 
 @app.cell
-def _(elem):
-    elem.to_pandas()
+def _(httpx, now, week):
+    SB_CA_URL = "https://ssd-api.jpl.nasa.gov/cad.api"
+    params_ca = {
+        "date-min": now.date(),
+        "date-max": week.date(),
+        "body": "Earth",
+        "limit": 5,
+        "sort": "dist-min",
+        "fullname": True,
+    }
+
+    sb_ca_res = httpx.get(url=SB_CA_URL, params=params_ca)
+    sb_ca_res.raise_for_status()
+
+    ca_data = sb_ca_res.json()
+
+    ca_data
     return
 
 

@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14, <3.15"
 dependencies = [
+    "boto3>=1.43.98",
     "httpx>=0.28.1",
 ]
 
@@ -13,4 +14,6 @@ dev = [
     "astroquery>=0.4.11",
     "marimo>=0.24.2",
     "pandas>=3.0.6",
+    "ruff>=0.16.8",
+    "ty>=0.0.82",
 ]
