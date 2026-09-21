@@ -10,5 +10,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "astroquery>=0.4.11",
     "marimo>=0.24.2",
+    "pandas>=3.0.6",
 ]
