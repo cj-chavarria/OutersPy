@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.24.2"
-app = marimo.App(width="full")
+app = marimo.App(width="medium")
 
 
 @app.cell
@@ -14,24 +14,14 @@ def _():
     import httpx
     import pandas as pd
 
-    return UTC, datetime, httpx, timedelta
+    return StringIO, UTC, datetime, httpx, pd, timedelta
 
 
 @app.cell
 def _(UTC, datetime, timedelta):
     now = datetime.now(tz=UTC)
-    week = now + timedelta(days=7)
+    week = now + timedelta(days=6)
     return now, week
-
-
-@app.cell
-def _():
-    JPL_API_URL = "https://ssd-api.jpl.nasa.gov/sbdb_query.api"
-    params_jpl: dict[str, str] = {
-        "fields": "full_name,epoch,e,a,q,i,om,w",
-        "sb-class": "COM",
-    }
-    return
 
 
 @app.cell
@@ -56,6 +46,38 @@ def _(HORIZON_API, httpx, params_horizon: dict[str, str]):
     response.raise_for_status()
     horizon_res = response.text
     print(horizon_res)
+    return (horizon_res,)
+
+
+@app.cell
+def _(horizon_res):
+    res_lines = horizon_res.split("\n")
+    res_lines
+    return (res_lines,)
+
+
+@app.cell
+def _(res_lines):
+    start_tbl_idx = 0
+    end_tbl_idx = 0
+    for idx, line in enumerate(res_lines):
+        start_tbl_idx = idx  if "$$SOE" in line else start_tbl_idx
+        end_tbl_idx = idx if "$$EOE" in line else end_tbl_idx
+
+    if start_tbl_idx and end_tbl_idx != 0:
+        header = res_lines[start_tbl_idx - 2].replace(" ","")
+        data = [s for s in res_lines[start_tbl_idx + 1: end_tbl_idx]]
+
+    data_str = "\n".join(data).replace(" ","")
+    tbl_out = header + "\n" + data_str
+
+    print(tbl_out)
+    return (tbl_out,)
+
+
+@app.cell
+def _(StringIO, pd, tbl_out):
+    pd.read_csv(StringIO(tbl_out))
     return
 
 
