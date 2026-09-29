@@ -1,10 +1,10 @@
-from datetime import date
+from datetime import datetime
 
 import httpx
 
 
 class JPLService:
-    def __init__(self, start_time: date, stop_time: date):
+    def __init__(self, start_time: datetime, stop_time: datetime):
         self.client = httpx.Client()
         self.start_time = start_time.strftime("%Y-%m-%d")
         self.stop_time = stop_time.strftime("%Y-%m-%d")
