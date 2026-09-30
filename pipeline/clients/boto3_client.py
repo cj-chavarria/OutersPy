@@ -5,8 +5,18 @@ from pipeline.core.config import boto3_config
 r2 = boto3.client(
     service_name=boto3_config.service_name,
     endpoint_url=boto3_config.endpoint_url,
-    aws_access_key_id=boto3_config.access_key_id,
-    aws_secret_access_key=boto3_config.secret_access_key,
+    aws_access_key_id=boto3_config.key_id,
+    aws_secret_access_key=boto3_config.access_key,
 )
 
-def load_json(folder_path: str, object):
+
+def load_json_2_r2(path: str, json: str, metadata: dict) -> dict:
+    load_response = r2.put_object(
+        Bucket=boto3_config.bucket_name,
+        Body=json,
+        ContentType="application/json",
+        Key=path,
+        Metadata=metadata,
+    )
+
+    return load_response
