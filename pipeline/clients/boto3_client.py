@@ -1,3 +1,5 @@
+import json
+
 import boto3
 
 from pipeline.core.config import boto3_config
@@ -10,13 +12,23 @@ r2 = boto3.client(
 )
 
 
-def load_json_2_r2(path: str, json: str, metadata: dict) -> dict:
-    load_response = r2.put_object(
+def load_json(path: str, json: str, metadata: dict) -> str:
+    response = r2.put_object(
         Bucket=boto3_config.bucket_name,
         Body=json,
         ContentType="application/json",
         Key=path,
         Metadata=metadata,
     )
+    etag = response.get("ETag")
+    return etag
 
-    return load_response
+
+def get_json(path: str) -> dict:
+    response = r2.get_object(
+        Bucket=boto3_config.bucket_name,
+        Key=path,
+        ResponseContentType="application/json",
+    )
+    content = response.get("Body").read().decode("utf-8")
+    return json.loads(s=content)
