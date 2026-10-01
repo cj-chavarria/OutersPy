@@ -13,7 +13,7 @@ class Boto3Config(BaseSettings):
     account_id: str = Field(alias="R2_ACCOUNT_ID")
 
     @property
-    def endpoint_url(self):
+    def endpoint_url(self) -> str:
         return f"https://{self.account_id}.r2.cloudflarestorage.com"
 
 
