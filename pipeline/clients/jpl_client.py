@@ -1,15 +1,13 @@
-from datetime import datetime
-
-import httpx
+import httpx2
 
 
 class JPLService:
-    def __init__(self, start_time: datetime, stop_time: datetime):
-        self.client = httpx.Client()
-        self.start_time = start_time.strftime("%Y-%m-%d")
-        self.stop_time = stop_time.strftime("%Y-%m-%d")
+    def __init__(self, start_time: str, stop_time: str):
+        self.client = httpx2.Client()
+        self.start_time = start_time
+        self.stop_time = stop_time
 
-    def orbit_elements(self, center: str, body: str):
+    def orbit_elements(self, center: str, body: str | int):
         response = self.client.get(
             url="https://ssd.jpl.nasa.gov/api/horizons.api",
             params={
