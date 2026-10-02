@@ -1,9 +1,17 @@
 from datetime import UTC, datetime, timedelta
+from pprint import pprint
+
+from pydantic import BaseModel
 
 from pipeline.clients.jpl_client import JPLService
 
 now = datetime.now(tz=UTC)
 week = now + timedelta(days=6)
+
+
+class HorizonResponse(BaseModel):
+    signature: dict
+    result: str
 
 
 PLANETS_ID = {
@@ -19,7 +27,9 @@ PLANETS_ID = {
 }
 
 if __name__ == "__main__":
-    with JPLService(start_time=now, stop_time=week) as jpl:
-        orbit = jpl.orbit_elements(center="@sun", body=PLANETS_ID["Earth"][1])
+    with JPLService(now, week) as jpl:
+        response = jpl.orbit_elements(center="@sun", body=PLANETS_ID["Earth"][1])
 
-    print(orbit.get("result"))
+    # pprint(response, sort_dicts=False)
+
+    print(HorizonResponse.model_validate(response))
