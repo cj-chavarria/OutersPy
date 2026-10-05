@@ -1,6 +1,6 @@
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 
 class HorizonResponse(BaseModel):
     signature: dict
-    result: str
+    result: int
