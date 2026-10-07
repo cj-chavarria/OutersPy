@@ -33,21 +33,28 @@ class JPLService:
             )
             response.raise_for_status()
         except httpx2.HTTPError as e:
-            logger.exception(
-                f"An error {e} ocurred when fetching orbit elements for the body: {body}"
-            )
+            logger.error(e)
             raise
+
         return response
 
     def close_approaches(self, body: str, dist_max: float = 0.05) -> httpx2.Response:
-        return self.client.get(
-            url="https://ssd-api.jpl.nasa.gov/cad.api",
-            params={
-                "body": body,
-                "date-min": self.start_time,
-                "date-max": self.stop_time,
-                "sort": "dist-min",
-                "diameter": True,
-                "dist-max": dist_max,
-            },
-        )
+        try:
+            response = self.client.get(
+                url="https://ssd-api.jpl.nasa.gov/cad.api",
+                params={
+                    "body": body,
+                    "date-min": self.start_time,
+                    "date-max": self.stop_time,
+                    "sort": "dist-min",
+                    "diameter": True,
+                    "dist-max": dist_max,
+                    "limit": 1,
+                },
+            )
+            response.raise_for_status()
+        except httpx2.HTTPError as e:
+            logger.error(e)
+            raise
+
+        return response

@@ -1,4 +1,4 @@
-from prefect import flow, task
+from prefect import task
 from pydantic import BaseModel, ValidationError
 from pydantic_core import PydanticSerializationError
 
@@ -8,8 +8,15 @@ from pipeline.utils.get_times import start_time, stop_time
 
 
 class HorizonResponse(BaseModel):
-    signature: dict
+    signature: dict[str, str]
     result: str
+
+
+class CloseApproachesResponse(BaseModel):
+    signature: dict[str, str]
+    count: int
+    fields: list[str] | None = None
+    data: list[list[str | None]] | None = None
 
 
 SUN = "@sun"
@@ -25,30 +32,34 @@ PLANETS = {
     "Neptune": ("Neptn", 899),
 }
 
-jpl = JPLService(start_time=start_time, stop_time=stop_time)
-
 
 @task
-def extract_planet_orbit(planet: int | str) -> str | None:
+def extract_object_orbit(
+    jpl: JPLService, object: int | str, center: str = SUN
+) -> str | None:
     try:
-        response = jpl.horizon(center=SUN, body=planet)
-        horizon_respose = HorizonResponse.model_validate(response.json())
+        response = jpl.horizon(center=center, body=object)
+        horizon_response = HorizonResponse.model_validate(response.json())
 
-        data = horizon_respose.model_dump_json(warnings="error")
-    except ValidationError, PydanticSerializationError:
-        logger.error(
-            "A error ocurred during data validation from the Horizon response. "
-        )
+        data = horizon_response.model_dump_json(warnings="error")
+
+    except (ValidationError, PydanticSerializationError) as e:
+        logger.error(e)
         return None
+
     return data
 
 
-@flow
-def my_flow():
-    for name, id in PLANETS.items():
-        logger.info(f"Fetch orbit for planet: {name}")
-        extract_planet_orbit(planet=id[1])
+@task
+def extract_planet_ca(jpl: JPLService, planet: str) -> str | None:
+    try:
+        response = jpl.close_approaches(body=planet)
+        ca_response = CloseApproachesResponse.model_validate(response.json())
 
+        data = ca_response.model_dump_json(warnings="error")
 
-if __name__ == "__main__":
-    pass
+    except (ValidationError, PydanticSerializationError) as e:
+        logger.error(e)
+        return None
+
+    return data
