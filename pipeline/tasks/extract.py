@@ -28,19 +28,26 @@ PLANETS = {
 jpl = JPLService(start_time=start_time, stop_time=stop_time)
 
 
-@task(log_prints=True)
-def extract_planet_orbit(planet: int | str) -> str:
+@task
+def extract_planet_orbit(planet: int | str) -> str | None:
     try:
         response = jpl.horizon(center=SUN, body=planet)
         horizon_respose = HorizonResponse.model_validate(response.json())
 
         data = horizon_respose.model_dump_json(warnings="error")
     except ValidationError, PydanticSerializationError:
-        logger.warning(
+        logger.error(
             "A error ocurred during data validation from the Horizon response. "
         )
-
+        return None
     return data
+
+
+@flow
+def my_flow():
+    for name, id in PLANETS.items():
+        logger.info(f"Fetch orbit for planet: {name}")
+        extract_planet_orbit(planet=id[1])
 
 
 if __name__ == "__main__":
