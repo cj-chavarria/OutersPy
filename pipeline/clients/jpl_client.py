@@ -15,13 +15,13 @@ class JPLService:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.client.close()
 
-    def horizon(self, center: str, body: str | int) -> httpx2.Response:
+    def horizon(self, center: str, command: str | int) -> httpx2.Response:
         try:
             response = self.client.get(
                 url="https://ssd.jpl.nasa.gov/api/horizons.api",
                 params={
                     "format": "json",
-                    "COMMAND": body,
+                    "COMMAND": command,
                     "EPHEM_TYPE": "ELEMENTS",
                     "CENTER": center,
                     "START_TIME": self.start_time,
@@ -46,10 +46,9 @@ class JPLService:
                     "body": body,
                     "date-min": self.start_time,
                     "date-max": self.stop_time,
-                    "sort": "dist-min",
+                    "sort": "dist",
                     "diameter": True,
                     "dist-max": dist_max,
-                    "limit": 1,
                 },
             )
             response.raise_for_status()

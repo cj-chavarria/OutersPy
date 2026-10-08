@@ -38,7 +38,7 @@ def extract_object_orbit(
     jpl: JPLService, object: int | str, center: str = SUN
 ) -> str | None:
     try:
-        response = jpl.horizon(center=center, body=object)
+        response = jpl.horizon(center=center, command=object)
         horizon_response = HorizonResponse.model_validate(response.json())
 
         data = horizon_response.model_dump_json(warnings="error")
