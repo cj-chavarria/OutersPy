@@ -17,11 +17,11 @@ def _load_data():
 
     json_obj = json.dumps(ca_test)
 
-    load_json(path=json_path, json=json_obj, metadata={"prueba5": "test5"})
+    load_json(key=json_path, body=json_obj, metadata={"prueba5": "test5"})
 
 
 def _get_data():
-    r2_json = get_json(path=json_path)
+    r2_json = get_json(key=json_path)
     return r2_json
 
 

@@ -22,10 +22,10 @@ class JPLService:
                 params={
                     "format": "json",
                     "COMMAND": command,
-                    "EPHEM_TYPE": "ELEMENTS",
+                    "EPHEM_TYPE": "VECTORS",
                     "CENTER": center,
                     "START_TIME": self.start_time,
-                    "STOP_TIME": self.stop_time,
+                    # "STOP_TIME": self.stop_time,
                     "STEP_SIZE": "1d",
                     "CSV_FORMAT": "YES",
                     "OUT_UNITS": "AU-D",

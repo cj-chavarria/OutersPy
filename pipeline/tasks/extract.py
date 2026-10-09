@@ -19,7 +19,7 @@ class CloseApproachesResponse(BaseModel):
     data: list[list[str | None]] | None = None
 
 
-SUN = "@sun"
+SOLAR_SYS_BARYCENTER = "@0"
 PLANETS = {
     # {Name: (Close Approach Name, Horizon ID)}
     "Mercury": ("Merc", 199),
@@ -35,7 +35,7 @@ PLANETS = {
 
 @task
 def extract_object_orbit(
-    jpl: JPLService, object: int | str, center: str = SUN
+    jpl: JPLService, object: int | str, center: str = SOLAR_SYS_BARYCENTER
 ) -> str | None:
     try:
         response = jpl.horizon(center=center, command=object)

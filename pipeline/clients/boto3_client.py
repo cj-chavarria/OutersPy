@@ -1,8 +1,8 @@
-import json
-
 import boto3
+from botocore.exceptions import ClientError
 
 from pipeline.core.config import boto3_config
+from pipeline.core.logger_base import logger
 
 r2 = boto3.client(
     service_name=boto3_config.service_name,
@@ -12,23 +12,27 @@ r2 = boto3.client(
 )
 
 
-def load_json(path: str, json: str, metadata: dict) -> str:
-    response = r2.put_object(
-        Bucket=boto3_config.bucket_name,
-        Body=json,
-        ContentType="application/json",
-        Key=path,
-        Metadata=metadata,
-    )
-    etag = response.get("ETag")
-    return etag
+def load_json(key: str, body: str, metadata: dict) -> dict:
+    try:
+        return r2.put_object(
+            Bucket=boto3_config.bucket_name,
+            Body=body,
+            ContentType="application/json",
+            Key=key,
+            Metadata=metadata,
+        )
+    except ClientError as e:
+        logger.error(e)
+        raise
 
 
-def get_json(path: str) -> dict:
-    response = r2.get_object(
-        Bucket=boto3_config.bucket_name,
-        Key=path,
-        ResponseContentType="application/json",
-    )
-    content = response.get("Body").read().decode("utf-8")
-    return json.loads(s=content)
+def get_json(key: str) -> dict:
+    try:
+        return r2.get_object(
+            Bucket=boto3_config.bucket_name,
+            Key=key,
+            ResponseContentType="application/json",
+        )
+    except ClientError as e:
+        logger.error(e)
+        raise
